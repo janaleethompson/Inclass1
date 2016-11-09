@@ -6,6 +6,20 @@ library(ggplot2)
 
 getwd()
 
+library(foreign)
+person_99 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_99")
+person_00 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_00")
+person_01 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_01")
+person_02 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_02")
+person_03 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_03")
+person_04 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_04")
+person_05 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_05")
+person_06 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_06")
+person_07 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_07")
+person_08 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_08")
+person_09 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_09")
+person_10 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_10")
+
 
 year <- c("99", "00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10")
 year

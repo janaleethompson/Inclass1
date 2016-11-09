@@ -2,7 +2,7 @@
 title: "Reproduced analysis of FARS data"
 author: "Janalee Thompson"
 date: "November 8, 2016"
-output: word_document
+output: pdf_document
 ---
 
 ## Results
@@ -12,18 +12,6 @@ Percentages of drivers testing positive by drug type, sex, and year group
 library(tidyverse)
 library(readr)
 library(foreign)
-person_99 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_99")
-person_00 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_00")
-person_01 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_01")
-person_02 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_02")
-person_03 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_03")
-person_04 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_04")
-person_05 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_05")
-person_06 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_06")
-person_07 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_07")
-person_08 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_08")
-person_09 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_09")
-person_10 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_10")
 
 getwd()
 load("~/Desktop/Inclass1/data/clean_fars.RData")
