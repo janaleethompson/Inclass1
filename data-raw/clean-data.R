@@ -37,7 +37,7 @@ clean_yearly_person_file <- function(year){
     filter(state %in% c(6, 15, 17, 33, 44, 54)) %>%
     
     mutate(state = factor(state, levels = c(6, 15, 17, 33, 44, 54),
-                          labels = c("California", "Hawaii", "Illonois", "New Hampshire", 
+                          labels = c("California", "Hawaii", "Illinois", "New Hampshire", 
                                      "Rhode Island", "West Virginia"))) %>%
     
     select(-state) %>%
