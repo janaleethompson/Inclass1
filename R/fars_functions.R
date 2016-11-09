@@ -11,7 +11,7 @@ per_cis <- function(x, n){
                      "(",round((lb * 100), 1),"%", ", ", round((ub * 100), 1),"%)")
   return(prop_new)
 }
-  per_cis(x = 9000, n = 23000)
+  #per_cis(x = 9000, n = 23000)
 
 
   
@@ -27,39 +27,40 @@ per_cis <- function(x, n){
         filter(drug_type == drug)   
     }  
     df <- df %>% 
-      group_by(year) %>%
+      group_by(study_year) %>%
       summarize(positive = sum(positive_for_drug, na.rm = TRUE),
                 trials = sum(!is.na(positive_for_drug)))
     ca_alcohol <- prop.trend.test(x = df$positive,
                                   n = df$trials)
-      out <- data.frame(Z = (sqrt(ca_alcohol$statistic)),
-                    p.value = (ca_alcohol$p.value))
-      rownames(out) <- NULL
+      out <- data.frame(Z = round(sqrt(ca_alcohol$statistic), digits = 1),
+                    p.value = round((ca_alcohol$p.value), digits = 3))
+      rownames(out) <- NULL 
     return(out)
   }
-  test_trend_ca("Stimulant")
+  
+  #test_trend_ca("Stimulant")
   
   
-#example from HW
-  to_test <- clean_fars %>%
-    filter(drug_type == "Alcohol") %>%
-    group_by(year) %>%
-    summarize(positive = sum(positive_for_drug, na.rm = TRUE),
-              trials = sum(!is.na(positive_for_drug)))
-  ca_alcohol <- prop.trend.test(x = to_test$positive,
-                                n = to_test$trials)
-  sqrt(ca_alcohol$statistic)
-  ca_alcohol$p.value
+# #example from HW
+#   to_test <- clean_fars %>%
+#     filter(drug_type == "Alcohol") %>%
+#     group_by(year) %>%
+#     summarize(positive = sum(positive_for_drug, na.rm = TRUE),
+#               trials = sum(!is.na(positive_for_drug)))
+#   ca_alcohol <- prop.trend.test(x = to_test$positive,
+#                                 n = to_test$trials)
+#   sqrt(ca_alcohol$statistic)
+#   ca_alcohol$p.value
    
    
-#use lapply to apply function over all drug categories for ca table
-   drug_list <- c("Alcohol", "Nonalcohol", "Narcotic", "Depressant",
-                  "Stimulant", "Cannabinoid", "Other")
-   drug_trend_tests_ca <- lapply(drug_list, test_trend_ca)
-   drug_trend_tests_ca <- dplyr::bind_rows(drug_trend_tests_ca) %>%
-     dplyr::mutate(drug = drug_list) %>%
-     dplyr::select(drug, Z, p.value)
-   drug_trend_tests_ca %>% knitr::kable()
+# #use lapply to apply function over all drug categories for ca table
+#    drug_list <- c("Alcohol", "Nonalcohol", "Narcotic", "Depressant",
+#                   "Stimulant", "Cannabinoid", "Other")
+#    drug_trend_tests_ca <- lapply(drug_list, test_trend_ca)
+#    drug_trend_tests_ca <- dplyr::bind_rows(drug_trend_tests_ca) %>%
+#      dplyr::mutate(drug = drug_list) %>%
+#      dplyr::select(drug, Z, p.value)
+#    drug_trend_tests_ca %>% knitr::kable()
   
    #logistic reg function
    library(tidyverse)
@@ -69,44 +70,44 @@ per_cis <- function(x, n){
      if (drug == "Nonalcohol"){
        df <- to_test %>% 
          dplyr::filter(drug_type != "Alcohol") 
-       log_reg <- glm(positive_for_drug ~ year, data = df,
+       log_reg <- glm(positive_for_drug ~ study_year, data = df,
                       family = binomial(link = "logit"))
        summary <- summary(log_reg)$coefficients
-       Z = round(summary[2,3], digits = 2)
+       Z = round(summary[2,3], digits = 1)
        p.value = round(summary[2,4], digits = 3)
        data.frame(Z, p.value)
      }
      else {
        df <- to_test %>% 
          filter(drug_type == drug)   
-       log_reg <- glm(positive_for_drug ~ year, data = df,
+       log_reg <- glm(positive_for_drug ~ study_year, data = df,
                       family = binomial(link = "logit"))
        summary <- summary(log_reg)$coefficients
-       Z = round(summary[2,3], digits = 2)
+       Z = round(summary[2,3], digits = 1)
        p.value = round(summary[2,4], digits = 3)
        data.frame(Z, p.value)
      }
    }
-   test_trend_log_reg("Alcohol")
-   test_trend_log_reg("Stimulant")
-   test_trend_log_reg("Nonalcohol")
+#    test_trend_log_reg("Alcohol")
+#    test_trend_log_reg("Stimulant")
+#    test_trend_log_reg("Nonalcohol")
    
    
-# logistic regression: need to write function to fit this
-   to_test <- clean_fars %>%
-     filter(drug_type == "Alcohol")
-   log_reg <- glm(positive_for_drug ~ year, data = to_test,
-                  family = binomial(link = "logit"))
-   summary(log_reg)$coefficients
+# # logistic regression: need to write function to fit this
+#    to_test <- clean_fars %>%
+#      filter(drug_type == "Alcohol")
+#    log_reg <- glm(positive_for_drug ~ year, data = to_test,
+#                   family = binomial(link = "logit"))
+#    summary(log_reg)$coefficients
    
    
-   #using lapply with this function to create a table 
-   drug_list <- c("Alcohol", "Nonalcohol", "Narcotic", "Depressant",
-                  "Stimulant", "Cannabinoid", "Other")
-   drug_trend_tests_log_reg <- lapply(drug_list, test_trend_log_reg)
-   drug_trend_tests_log_reg <- dplyr::bind_rows(drug_trend_tests_log_reg) %>%
-     dplyr::mutate(drug = drug_list) %>%
-     dplyr::select(drug, Z, p.value)
-   drug_trend_tests_log_reg %>% knitr::kable()
+#    #using lapply with this function to create a table 
+#    drug_list <- c("Alcohol", "Nonalcohol", "Narcotic", "Depressant",
+#                   "Stimulant", "Cannabinoid", "Other")
+#    drug_trend_tests_log_reg <- lapply(drug_list, test_trend_log_reg)
+#    drug_trend_tests_log_reg <- dplyr::bind_rows(drug_trend_tests_log_reg) %>%
+#      dplyr::mutate(drug = drug_list) %>%
+#      dplyr::select(drug, Z, p.value)
+#    drug_trend_tests_log_reg %>% knitr::kable()
      
    

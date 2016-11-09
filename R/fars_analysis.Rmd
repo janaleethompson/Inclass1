@@ -1,23 +1,29 @@
 ---
 title: "Reproduced analysis of FARS data"
-author: "Janalee Thompson"
-date: "November 8, 2016"
-output: pdf_document
+
+
+output: word_document
 ---
-
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=7, fig.height=5,
+                      echo=FALSE, warning=FALSE, message=FALSE, error = FALSE)
+```
 ## Results
-Percentages of drivers testing positive by drug type, sex, and year group
+**Percentages of drivers testing positive by drug type, sex, and year group**
 
-```{r, echo = FALSE, warning = FALSE, error = FALSE}
-library(tidyverse)
+```{r, load}
+library(dplyr)
 library(readr)
 library(foreign)
+library(knitr)
 
-getwd()
-load("~/Desktop/Inclass1/data/clean_fars.RData")
+load("../data/clean_fars.RData")
+source("../R/fars_functions.R")
+```
 
-clean_fars <- clean_fars %>%
-  dplyr::mutate(year_cat = cut(year, breaks = c(1999, 2002, 2006, 2010),
+```{r, first table}
+clean_fars %>%
+  dplyr::mutate(year_cat = cut(study_year, breaks = c(1999, 2002, 2006, 2010),
                         labels = c("1999-2002", "2003-2006",
                                    "2007-2010"),
                         include.lowest = TRUE, right = TRUE)) %>%
@@ -25,11 +31,11 @@ clean_fars <- clean_fars %>%
   dplyr::filter(!is.na(sex)) %>%
   dplyr::group_by(drug_type, sex, year_cat) %>%
   
-  summarize(n_non_missing = sum(!is.na(positive_for_drug)),
+  dplyr::summarize(n_non_missing = sum(!is.na(positive_for_drug)),
             positive_test = sum(positive_for_drug, na.rm = TRUE),
             perc_positive = round(100 * positive_test / n_non_missing, 1)) %>%
   
-  select(drug_type, sex, year_cat, perc_positive) %>%
+  dplyr::select(drug_type, sex, year_cat, perc_positive) %>%
   
   tidyr::unite(sex_year_cat, sex, year_cat) %>%
   tidyr::spread(sex_year_cat, perc_positive) %>%
@@ -39,14 +45,13 @@ clean_fars <- clean_fars %>%
                              "M 2007-2010"))
 ```
 
-Figure 1: Prevalence of nonalcohol drugs in fatally injured drivers by year and age group
 
-```{r, echo = FALSE, warning = FALSE, error = FALSE}
+**Figure 1: Prevalence of nonalcohol drugs in fatally injured drivers by year and age group**
 
+```{r, first figure}
 library(ggplot2)
 library(ggthemes)
 library(gridExtra)
-library(tidyverse)
 library(dplyr)
 
 clean_fars2 <- clean_fars %>%
@@ -54,15 +59,15 @@ clean_fars2 <- clean_fars %>%
          (!is.na(agecat))) %>%
   dplyr::filter(drug_type != "Alcohol") %>%
   dplyr::group_by(unique_id) %>%
-  summarize(positive_for_drug = any(positive_for_drug),
+  dplyr::summarize(positive_for_drug = any(positive_for_drug),
             agecat = first(agecat),
-            year = first(year)) %>%
+            year = first(study_year)) %>%
   ungroup() %>%
   dplyr::group_by(agecat, year) %>%
   dplyr::summarize(perc_pos_drug = mean(positive_for_drug) * 100) 
 
 plot1 <- ggplot(clean_fars2, aes(x = year, y = perc_pos_drug, shape = agecat)) +
-            geom_point(alpha = 0.5) +
+            geom_point(alpha = 0.9) +
             geom_line() +
             scale_shape_discrete(name = "Age") +
             scale_x_continuous(name = "Year") + 
@@ -72,17 +77,18 @@ plot1 <- ggplot(clean_fars2, aes(x = year, y = perc_pos_drug, shape = agecat)) +
 ```
 
 
-Figure 2: Prevalence of nonalcohol drugs in fatally injured drivers by year and drug type
-```{r, echo = FALSE, warning = FALSE, error = FALSE}
+**Figure 2: Prevalence of nonalcohol drugs in fatally injured drivers by year and drug type**
 
-plot2 <- dplyr::group_by(clean_fars, drug_type, year) %>%
+```{r, second figure}
+
+plot2 <- dplyr::group_by(clean_fars, drug_type, study_year) %>%
     dplyr::filter(!is.na(positive_for_drug),
          (!is.na(drug_type))) %>%
     dplyr::filter(drug_type != "Alcohol") %>%
   dplyr::summarize(perc_pos_drug = mean(positive_for_drug) * 100) %>%
-ggplot(aes(x = year, y = perc_pos_drug, 
+ggplot(aes(x = study_year, y = perc_pos_drug, 
                                  shape = drug_type)) +
-            geom_point(alpha = 0.5) +
+            geom_point(alpha = 0.9) +
             geom_line() +
             scale_shape_discrete(name = "Drug Type") +
             scale_x_continuous(name = "Year") + 
@@ -91,16 +97,18 @@ ggplot(aes(x = year, y = perc_pos_drug,
   plot2
 ```
 
-Figure 3: Prevalence of cannabinoid drugs in fatally injured drivers by year and age group
-```{r, echo = FALSE, warning = FALSE, error = FALSE}
+
+**Figure 3: Prevalence of cannabinoid drugs in fatally injured drivers by year and age group**
+
+```{r, third figure}
  
-plot3 <- dplyr::group_by(clean_fars, agecat, year) %>%
+plot3 <- dplyr::group_by(clean_fars, agecat, study_year) %>%
     dplyr::filter(!is.na(positive_for_drug),
          (!is.na(agecat))) %>%
     dplyr::filter(drug_type == "Cannabinoid") %>%
   dplyr::summarize(perc_pos_drug = mean(positive_for_drug) * 100) 
-ggplot(plot3, aes(x = year, y = perc_pos_drug, shape = agecat)) +
-            geom_point(alpha = 0.5) +
+ggplot(plot3, aes(x = study_year, y = perc_pos_drug, shape = agecat)) +
+            geom_point(alpha = 0.9) +
             geom_line() +
             scale_shape_discrete(name = "Age") +
             scale_x_continuous(name = "Year") + 
@@ -108,32 +116,26 @@ ggplot(plot3, aes(x = year, y = perc_pos_drug, shape = agecat)) +
   theme_few()
 ```
 
-Prevalence of drugs in fatally injured drivers for 1999 and 2010 by drug type
+
+**Prevalence of drugs in fatally injured drivers for 1999 and 2010 by drug type**
+
 ```{r, echo = FALSE, warning = FALSE, error = FALSE}
 
-per_cis <- function(x, n){
- prop_est <- x/n
-  se <- sqrt(prop_est*(1-prop_est)/n)
-  lb <- prop_est - 1.96 * se
-  ub <- prop_est + 1.96 * se
-  prop_new <- paste0(round((prop_est * 100), 1), "% ", 
-                     "(",round((lb * 100), 1),"%", ", ", round((ub * 100), 1),"%)")
-  return(prop_new)
-}
-
 clean_fars %>%
-dplyr::filter(year == 2010 | year == 1999) %>%
-  group_by(drug_type, year) %>%
+dplyr::filter(study_year == 2010 | study_year == 1999) %>%
+  group_by(drug_type, study_year) %>%
 dplyr::summarize(n = sum(!is.na(positive_for_drug)),
         x = sum(positive_for_drug, na.rm = TRUE)) %>%
   dplyr::mutate(value = per_cis(x,n)) %>%
-  select(drug_type, year, value) %>%
-  spread(key = year, value = value) %>% 
+  select(drug_type, study_year, value) %>%
+  tidyr::spread(key = study_year, value = value) %>% 
   rename(`Drug type` = drug_type) %>%
   knitr::kable()
 ```
 
-Statistics for testing for trend in prevalence of drugs over study years by drug type using Cochran-Armitage trend test
+
+**Statistics for testing for trend in prevalence of drugs over study years by drug type using Cochran-Armitage trend test**
+
 ```{r, echo = FALSE, warning = FALSE, error = FALSE}
   
 drug_list <- c("Alcohol", "Nonalcohol", "Narcotic", "Depressant",
@@ -142,10 +144,13 @@ drug_list <- c("Alcohol", "Nonalcohol", "Narcotic", "Depressant",
    drug_trend_tests_ca <- dplyr::bind_rows(drug_trend_tests_ca) %>%
      dplyr::mutate(drug = drug_list) %>%
      dplyr::select(drug, Z, p.value)
-   drug_trend_tests_ca %>% knitr::kable()
+   drug_trend_tests_ca %>% 
+     knitr::kable()
 ```
 
-Statistics for testing for trend in prevalence of drugs over study years by drug type using Wald test of logistic regression coefficient for “year”
+
+**Statistics for testing for trend in prevalence of drugs over study years by drug type using Wald test of logistic regression coefficient for “year”**
+
 ```{r, echo = FALSE, warning = FALSE, error = FALSE}
       drug_list <- c("Alcohol", "Nonalcohol", "Narcotic", "Depressant",
                   "Stimulant", "Cannabinoid", "Other")

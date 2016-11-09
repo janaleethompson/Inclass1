@@ -4,78 +4,77 @@ library(stringr)
 library(readr)
 library(ggplot2)
 
-getwd()
+
 
 library(foreign)
-person_99 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_99")
-person_00 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_00")
-person_01 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_01")
-person_02 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_02")
-person_03 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_03")
-person_04 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_04")
-person_05 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_05")
-person_06 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_06")
-person_07 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_07")
-person_08 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_08")
-person_09 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_09")
-person_10 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_10")
+person_99 <- read.dbf("yearly_person_data/person_99")
+person_00 <- read.dbf("yearly_person_data/person_00")
+person_01 <- read.dbf("yearly_person_data/person_01")
+person_02 <- read.dbf("yearly_person_data/person_02")
+person_03 <- read.dbf("yearly_person_data/person_03")
+person_04 <- read.dbf("yearly_person_data/person_04")
+person_05 <- read.dbf("yearly_person_data/person_05")
+person_06 <- read.dbf("yearly_person_data/person_06")
+person_07 <- read.dbf("yearly_person_data/person_07")
+person_08 <- read.dbf("yearly_person_data/person_08")
+person_09 <- read.dbf("yearly_person_data/person_09")
+person_10 <- read.dbf("yearly_person_data/person_10")
 
 
 year <- c("99", "00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10")
-year
+
 
 #create function
 #create loop- add in function  
-year = "99"
-clean_yearly_person_file <- function(year){  
-  setwd("~/Desktop/Inclass1/data-raw/yearly_person_data")
-  year <- stringr::str_sub(year, -2)
-  df <- read.dbf(paste0("person_", year))
+study_year = 1999
+clean_yearly_person_file <- function(study_year){  
+  study_year <- stringr::str_sub(study_year, -2)
+  df <- read.dbf(paste0("yearly_person_data/person_", study_year))
    
-  if (year == "99") {                                   
-    df <- dplyr::mutate(df, year = paste0("19", year))     
+  if (study_year == "99") {                                   
+    df <- dplyr::mutate(df, study_year = paste0("19", study_year))     
   } else {                                                
-    df <- dplyr::mutate(df, year = paste0("20", year))     
+    df <- dplyr::mutate(df, study_year = paste0("20", study_year))     
   }                                                      
   colnames(df) <- tolower(colnames(df))
   
   df <- df %>%  
     
     dplyr::select(state, age, sex, per_typ, inj_sev, alc_res, drugres1, 
-                  drugres2, drugres3, lag_hrs, lag_mins, st_case, year, 
+                  drugres2, drugres3, lag_hrs, lag_mins, st_case, study_year, 
                   per_no, veh_no) %>%
     
-    filter(per_typ == 1) %>%
+    dplyr::filter(per_typ == 1) %>%
     
-    select(-per_typ) %>%
+    dplyr::select(-per_typ) %>%
     
-    unite(unique_id, state, veh_no, per_no, st_case, year, remove = FALSE) %>%
+    tidyr::unite(unique_id, state, veh_no, per_no, st_case, study_year, remove = FALSE) %>%
     
-    filter(state %in% c(6, 15, 17, 33, 44, 54)) %>%
+    dplyr::filter(state %in% c(6, 15, 17, 33, 44, 54)) %>%
     
-    mutate(state = factor(state, levels = c(6, 15, 17, 33, 44, 54),
+    dplyr::mutate(state = factor(state, levels = c(6, 15, 17, 33, 44, 54),
                           labels = c("California", "Hawaii", "Illinois", "New Hampshire", 
                                      "Rhode Island", "West Virginia"))) %>%
     
-    select(-state) %>%
+    dplyr::select(-state) %>%
     
-    mutate(sex = ifelse(sex == 1, "Male", sex), 
+    dplyr::mutate(sex = ifelse(sex == 1, "Male", sex), 
            sex = ifelse(sex == 2, "Female", sex), 
            sex = ifelse(sex == 9, NA, sex),
            sex = factor(sex)) %>%
     
-    mutate(year = as.integer(year)) %>%
+    dplyr::mutate(study_year = as.integer(study_year)) %>%
     
-    mutate(alc_res = ifelse(alc_res == 95, NA, alc_res),
+    dplyr::mutate(alc_res = ifelse(alc_res == 95, NA, alc_res),
     alc_res = ifelse(alc_res == 96, NA, alc_res),
     alc_res = ifelse(alc_res == 97, NA, alc_res),
     alc_res = ifelse(alc_res == 98, NA, alc_res),
     alc_res = ifelse(alc_res == 99, NA, alc_res)) %>%
     
-    mutate(Alcohol = ifelse(alc_res > 0, TRUE, FALSE))
+    dplyr::mutate(Alcohol = ifelse(alc_res > 0, TRUE, FALSE))
     
     gathered_df <- df %>%
-    tidyr::gather(drug_number, drug_type_raw, contains("drugres")) %>%
+    tidyr::gather(drug_number, drug_type_raw, dplyr::contains("drugres")) %>%
     dplyr::mutate(drug_type = ifelse(drug_type_raw %in% 100:295,
                                      "Narcotic", NA),
                   drug_type = ifelse(drug_type_raw %in% 300:395,
@@ -89,52 +88,52 @@ clean_yearly_person_file <- function(year){
                   drug_type = ifelse(drug_type_raw == 1,
                                      "None", drug_type),
                   drug_type = factor(drug_type)) %>%
-          select(-drug_type_raw, -drug_number) %>%
+          dplyr::select(-drug_type_raw, -drug_number) %>%
     
-      filter(!(is.na(Alcohol) & is.na(drug_type)))
+      dplyr::filter(!(is.na(Alcohol) & is.na(drug_type)))
     
     non_missing_drugs <- gathered_df %>%
-    filter(!is.na(drug_type)) %>%
-    group_by(unique_id, drug_type) %>%
-    summarize(has_drug = TRUE) %>%
-    ungroup() %>%
-    mutate(row_num = 1:n()) %>%
-    spread(drug_type, has_drug, fill = FALSE) %>%
-    select(-row_num) %>%
-    group_by(unique_id) %>%
-    summarize(Cannabinoid = any(Cannabinoid),
+    dplyr::filter(!is.na(drug_type)) %>%
+    dplyr::group_by(unique_id, drug_type) %>%
+    dplyr::summarize(has_drug = TRUE) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(row_num = 1:n()) %>%
+    tidyr::spread(drug_type, has_drug, fill = FALSE) %>%
+    dplyr::select(-row_num) %>%
+    dplyr::group_by(unique_id) %>%
+    dplyr::summarize(Cannabinoid = any(Cannabinoid),
               Depressant = any(Depressant),
               Narcotic = any(Narcotic),
               Other = any(Other),
               Stimulant = any(Stimulant)) %>%
-    ungroup()
+    dplyr::ungroup()
   df <- df %>%
-    dplyr::select(-contains("drugres")) %>%
+    dplyr::select(-dplyr::contains("drugres")) %>%
     dplyr::full_join(non_missing_drugs, by = "unique_id") %>%
     tidyr::gather(drug_type, positive_for_drug, Alcohol, Cannabinoid,
                   Depressant, Narcotic, Other, Stimulant) %>%
     dplyr::mutate(drug_type = factor(drug_type)) %>%
     
-    mutate(lag_hrs = ifelse(lag_hrs == 999, NA, lag_hrs),
+    dplyr::mutate(lag_hrs = ifelse(lag_hrs == 999, NA, lag_hrs),
                         ifelse(lag_hrs == 99, NA, lag_hrs),
                         ifelse(lag_hrs == 88, NA, lag_hrs)) %>%
-      filter((lag_hrs == 1 & lag_mins == 0) | lag_hrs < 1) %>%
+      dplyr::filter((lag_hrs == 1 & lag_mins == 0) | lag_hrs < 1) %>%
             
-      select(-lag_hrs, -lag_mins) %>%
+      dplyr::select(-lag_hrs, -lag_mins) %>%
     
-    mutate(age, ifelse(age == 99, NA, age),
+    dplyr::mutate(age, ifelse(age == 99, NA, age),
            ifelse(age == 999, NA, age)) %>%
     
-    mutate(agecat = cut(age, breaks = c(0, 25, 44, 64, 98),
+    dplyr::mutate(agecat = cut(age, breaks = c(0, 25, 44, 64, 98),
                   labels = c("< 25 years", "25--44 years", "45--64 years", "65 years +"))) %>%
-    select(-age) %>%
+    dplyr::select(-age) %>%
     
-    select(unique_id, sex, year, agecat, drug_type, positive_for_drug)
+    dplyr::select(unique_id, sex, study_year, agecat, drug_type, positive_for_drug)
     return(df)
 }
 
-data_1999 <- clean_yearly_person_file(1999)
-data_1999 %>%
+data_99 <- clean_yearly_person_file(1999)
+data_99 %>%
   group_by(drug_type) %>%
   slice(1:3)
 
@@ -151,9 +150,9 @@ for(year in 1999:2010){
     clean_fars <- rbind(clean_fars, df)
   }
 }
-save(clean_fars, file = "~/Desktop/Inclass1/data/clean_fars.RData") 
+save(clean_fars, file = "../data/clean_fars.RData") 
 
-load("~/Desktop/Inclass1/data/clean_fars.RData")
+load("../data/clean_fars.RData")
 dim(clean_fars)
 length(unique(clean_fars$unique_id))
 summary(clean_fars)
