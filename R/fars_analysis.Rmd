@@ -29,13 +29,13 @@ getwd()
 load("~/Desktop/Inclass1/data/clean_fars.RData")
 
 clean_fars <- clean_fars %>%
-  mutate(year_cat = cut(year, breaks = c(1999, 2002, 2006, 2010),
+  dplyr::mutate(year_cat = cut(year, breaks = c(1999, 2002, 2006, 2010),
                         labels = c("1999-2002", "2003-2006",
                                    "2007-2010"),
                         include.lowest = TRUE, right = TRUE)) %>%
   
   dplyr::filter(!is.na(sex)) %>%
-  group_by(drug_type, sex, year_cat) %>%
+  dplyr::group_by(drug_type, sex, year_cat) %>%
   
   summarize(n_non_missing = sum(!is.na(positive_for_drug)),
             positive_test = sum(positive_for_drug, na.rm = TRUE),
@@ -43,8 +43,8 @@ clean_fars <- clean_fars %>%
   
   select(drug_type, sex, year_cat, perc_positive) %>%
   
-  unite(sex_year_cat, sex, year_cat) %>%
-  spread(sex_year_cat, perc_positive) %>%
+  tidyr::unite(sex_year_cat, sex, year_cat) %>%
+  tidyr::spread(sex_year_cat, perc_positive) %>%
   knitr::kable(col.names = c("Drug type", "F 1999-2002",
                              "F 2003-2006", "F 2007-2010",
                              "M 1999-2002", "M 2003-2006",
@@ -134,11 +134,11 @@ per_cis <- function(x, n){
 }
 
 clean_fars %>%
-filter(year == 2010 | year == 1999) %>%
+dplyr::filter(year == 2010 | year == 1999) %>%
   group_by(drug_type, year) %>%
 dplyr::summarize(n = sum(!is.na(positive_for_drug)),
         x = sum(positive_for_drug, na.rm = TRUE)) %>%
-  mutate(value = per_cis(x,n)) %>%
+  dplyr::mutate(value = per_cis(x,n)) %>%
   select(drug_type, year, value) %>%
   spread(key = year, value = value) %>% 
   rename(`Drug type` = drug_type) %>%
