@@ -10,13 +10,31 @@ Percentages of drivers testing positive by drug type, sex, and year group
 
 ```{r, echo = FALSE, warning = FALSE, error = FALSE}
 library(tidyverse)
-clean_fars %>%
+library(readr)
+library(foreign)
+person_99 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_99")
+person_00 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_00")
+person_01 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_01")
+person_02 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_02")
+person_03 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_03")
+person_04 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_04")
+person_05 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_05")
+person_06 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_06")
+person_07 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_07")
+person_08 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_08")
+person_09 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_09")
+person_10 <- read.dbf("/Users/janaleethompson/Desktop/Inclass1/data-raw/yearly_person_data/person_10")
+
+getwd()
+load("~/Desktop/Inclass1/data/clean_fars.RData")
+
+clean_fars <- clean_fars %>%
   mutate(year_cat = cut(year, breaks = c(1999, 2002, 2006, 2010),
                         labels = c("1999-2002", "2003-2006",
                                    "2007-2010"),
                         include.lowest = TRUE, right = TRUE)) %>%
   
-  filter(!is.na(sex)) %>%
+  dplyr::filter(!is.na(sex)) %>%
   group_by(drug_type, sex, year_cat) %>%
   
   summarize(n_non_missing = sum(!is.na(positive_for_drug)),
@@ -68,7 +86,7 @@ plot1 <- ggplot(clean_fars2, aes(x = year, y = perc_pos_drug, shape = agecat)) +
 
 Figure 2: Prevalence of nonalcohol drugs in fatally injured drivers by year and drug type
 ```{r, echo = FALSE, warning = FALSE, error = FALSE}
-  
+
 plot2 <- dplyr::group_by(clean_fars, drug_type, year) %>%
     dplyr::filter(!is.na(positive_for_drug),
          (!is.na(drug_type))) %>%
@@ -87,8 +105,8 @@ ggplot(aes(x = year, y = perc_pos_drug,
 
 Figure 3: Prevalence of cannabinoid drugs in fatally injured drivers by year and age group
 ```{r, echo = FALSE, warning = FALSE, error = FALSE}
-  clean_fars4 <- clean_fars 
-plot3 <- dplyr::group_by(clean_fars4, agecat, year) %>%
+ 
+plot3 <- dplyr::group_by(clean_fars, agecat, year) %>%
     dplyr::filter(!is.na(positive_for_drug),
          (!is.na(agecat))) %>%
     dplyr::filter(drug_type == "Cannabinoid") %>%
